@@ -21,7 +21,7 @@ class SistemaView:
             print("3. Listar Visitantes")
             print("4. Ordenar Visitantes")
             print("5. Filtrar Visitantes")
-            print("6. Consultar Visitantes")
+            print("6. Consultar Visitante por CPF")
             print("7. Encerrar Programa")
             print(divider)
             escolha = input("\nSelecione uma opção: ")
@@ -29,16 +29,12 @@ class SistemaView:
             match escolha:
                 case "1":
                     self.tela_cadastrar_visitante()
-                    break
                 case "2":
                     self.tela_remover_visitante()
-                    break
                 case "3":
                     self.tela_listar_visitantes()
-                    break
                 case "6":
                     self.tela_consultar_por_cpf()
-                    break
                 case "7":
                     break
 
@@ -111,10 +107,11 @@ class SistemaView:
                 "dataVisita": data_visita
             }
 
-            print(novo_visitante)
+            resultado = self.visitantes_service.cadastrar_visitante(novo_visitante)
 
-            self.visitantes_service.cadastrar_visitante(novo_visitante)
-
+            print()
+            print(resultado)
+            print()
             print(divider)
             mensagem_voltar()
             return
@@ -141,7 +138,7 @@ class SistemaView:
 
             resultado = self.visitantes_service.consultar_por_cpf(cpf)
 
-            for chave, valor in resultado:
+            for chave, valor in resultado.items():
                 print(f"{chave}: {valor}")
 
             print()
@@ -155,12 +152,12 @@ class SistemaView:
             print_title()
 
             print()
-            print("Visitantes:")
+            print("Lista de visitantes:")
             print(divider)
 
             resultado = self.visitantes_service.listar_todos()
 
-            for chave, valor in resultado:
+            for chave, valor in resultado.items():
                 print(f"{chave}: {valor}")
 
             print()
@@ -189,11 +186,10 @@ class SistemaView:
                     input("Erro: Valor inválido!")
 
             resultado = self.visitantes_service.consultar_por_cpf(cpf)
-
-            for chave, valor in resultado:
+            print(divider)
+            for chave, valor in resultado.items():
                 print(f"{chave}: {valor}")
 
-            print()
             print(divider)
             mensagem_voltar()
             return

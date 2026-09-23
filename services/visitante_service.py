@@ -2,6 +2,8 @@ import uuid
 from data import DbContext
 from datetime import date
 from models import Visitante
+from enums import IngressoTipo
+from utils import resolver_idade, resolver_ingresso_tipo
 
 class VisitanteService:
     def __init__(self, db: DbContext):
@@ -30,27 +32,27 @@ class VisitanteService:
     def remover_visitante(self, cpf: str):
         self.db.remover(cpf)
 
-    def listar_todos(self, cpf: str):
+    def listar_todos(self):
         try:
-            visitantes: list[Visitante] = self.db.obter_todos()
+            visitantes = self.db.obter_todos()
 
-            if visitantes == None or visitantes.count() <= 0:
+            if visitantes == None or len(visitantes) <= 0:
                 return {"Erro": "Não ha visitantes cadastrados"}
 
             lista_visitantes_dados = []
-            
+
             for visitante in visitantes:
                 visitante_dados = {
                     "Nome": visitante.nome,
-                    "Idade": f"{visitante.data_nascimento - date.today()} anos",
-                    "Ingresso": visitante.ingresso_tipo,
+                    "Idade": f"{resolver_idade(visitante.data_nascimento)} anos",
+                    "Ingresso": resolver_ingresso_tipo(visitante.ingresso_tipo),
                 }
                 lista_visitantes_dados.append(visitante_dados)
 
             return lista_visitantes_dados
 
-        except:
-            return {"Erro": "Ocorreu um erro interno"}
+        except Exception as e:
+            return {"Erro": f"Ocorreu um erro interno{e}"}
 
 
     def consultar_por_cpf(self, cpf: str):
@@ -62,11 +64,11 @@ class VisitanteService:
 
             visitante_dados = {
                 "Nome": visitante.nome,
-                "Idade": f"{visitante.data_nascimento - date.today()} anos",
+                "Idade": f"{resolver_idade(visitante.data_nascimento)} anos",
                 "CPF": visitante.cpf,
                 "Data de Nascimento": visitante.data_nascimento,
-                "Ingresso": visitante.ingresso_tipo,
-                "Data da visita": visitante.data_visita,
+                "Ingresso": resolver_ingresso_tipo(visitante.ingresso_tipo),
+                "Data da visita": visitante.data_visita.strftime('%d/%m/%Y'),
                 "Número do ingresso": visitante.numero_ingresso
             }
             return visitante_dados
