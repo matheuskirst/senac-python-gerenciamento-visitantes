@@ -1,7 +1,7 @@
 from datetime import datetime
 from services import VisitanteService
 from utils import clear_screen, title_divider, divider, print_title, solicitar_texto, mensagem_voltar
-from enums import IngressoTipo
+from enums import IngressoTipo, Ordenar
 
 class SistemaView:
     def __init__(self, visitantes_service: VisitanteService):
@@ -33,11 +33,14 @@ class SistemaView:
                     self.tela_remover_visitante()
                 case "3":
                     self.tela_listar_visitantes()
+                case "4":
+                    self.tela_ordenar_visitantes()
+                case "5":
+                    return
                 case "6":
                     self.tela_consultar_por_cpf()
                 case "7":
                     break
-
 
     def tela_cadastrar_visitante(self):
         while True:
@@ -87,7 +90,6 @@ class SistemaView:
                     case "3":
                         ingresso_tipo = IngressoTipo.Premium
                         break
-
                     case _:
                         input("Erro: Valor inválido!")
 
@@ -156,6 +158,73 @@ class SistemaView:
             print(divider)
 
             resultado = self.visitantes_service.listar_todos()
+
+            for chave, valor in resultado.items():
+                print(f"{chave}: {valor}")
+
+            print()
+            print(divider)
+            mensagem_voltar()
+            return
+
+    def tela_ordenar_visitantes(self):
+        while True:
+            clear_screen()
+            print_title()
+
+            print()
+            print("Ordenar visitantes:")
+            print(divider)
+
+            print("1. Ordernar por nome")
+            print("2. Ordernar por idade")
+            print("3. Voltar")
+
+            escolha = input("Opção: ")
+            match escolha:
+                case "1":
+                    resultado = self.visitantes_service.listar_todos(ordem=Ordenar.Nome)
+                case "2":
+                    resultado = self.visitantes_service.listar_todos(ordem=Ordenar.Idade)
+                case "3":
+                    break
+                case _:
+                    continue
+
+            for chave, valor in resultado.items():
+                print(f"{chave}: {valor}")
+
+            print()
+            print(divider)
+            mensagem_voltar()
+            return
+
+    def tela_filtrar_visitantes(self):
+        while True:
+            clear_screen()
+            print_title()
+
+            print()
+            print("Ordenar visitantes:")
+            print(divider)
+
+            print("1. Filtrar por Ingresso Normal")
+            print("2. Filtrar por Ingresso VIP")
+            print("3. Filtrar por Ingresso Premium")
+            print("4. Voltar")
+
+            escolha = input("Opção: ")
+            match escolha:
+                case "1":
+                    resultado = self.visitantes_service.listar_todos(filtro=IngressoTipo.Normal)
+                case "2":
+                    resultado = self.visitantes_service.listar_todos(filtro=IngressoTipo.Vip)
+                case "3":
+                    resultado = self.visitantes_service.listar_todos(filtro=IngressoTipo.Premium)
+                case "4":
+                    break
+                case _:
+                    continue
 
             for chave, valor in resultado.items():
                 print(f"{chave}: {valor}")

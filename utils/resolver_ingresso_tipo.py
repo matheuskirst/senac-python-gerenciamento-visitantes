@@ -1,7 +1,7 @@
 from enums import IngressoTipo
 
 def resolver_ingresso_tipo(tipo):
-    match tipo.ingresso_tipo:
+    match tipo:
         case IngressoTipo.Normal:
             ingresso_tipo = "Normal"
         case IngressoTipo.Vip:

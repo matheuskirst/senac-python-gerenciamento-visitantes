@@ -1,4 +1,7 @@
+import json
+from dataclasses import Field
 from models import Visitante
+from enums import Ordenar
 
 class DbContext:
     def __init__(self):
@@ -15,24 +18,28 @@ class DbContext:
             if visitante.cpf == cpf:
                 self.visitantes.remove(visitante)
 
-    def obter_todos(self):
-        return self.visitantes
-
-    def obter_por_index(self, index: int):
-        return self.visitantes[index]
-    
-    def obter_por_nome(self, nome: str):
-        filtro = []
-        for visitante in self.visitantes:
-            if visitante.nome == nome:
-                filtro.append(visitante)
-        return filtro
-        
-    def obter_por_cpf(self, cpf: str):
-        for visitante in self.visitantes:
-            if visitante.cpf == cpf:
-                return visitante
+    def obter_item(self, campo:str, valor):
+        for item in self.visitantes:
+            if getattr(item, campo) == valor:
+                return item
         return None
-    
+
+    def obter_items_lista(self, ordem=None, filtro=None):
+        items = self.visitantes
+
+        if ordem:
+            if ordem == Ordenar.Nome:
+                items += items.sort(key=lambda v: v.nome)
+            elif ordem == Ordenar.Idade:
+                items += items.sort(key=lambda v: v.idade)
+
+        if filtro:
+            items += filter(lambda v: v.ingresso_tipo == filtro, items)
+
+        return items
+
     def obter_quantidade(self):
         return len(self.visitantes)
+
+    def salvar(self):
+        return
