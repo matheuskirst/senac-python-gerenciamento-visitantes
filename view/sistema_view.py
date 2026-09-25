@@ -1,10 +1,10 @@
 from datetime import datetime
-from services import VisitanteService
-from utils import clear_screen, title_divider, divider, print_title, solicitar_texto, mensagem_voltar
+from services import VisitantesService
+from utils import clear_screen, title_divider, divider, print_title, solicitar_texto, mensagem_voltar, print_resultado
 from enums import IngressoTipo, Ordenar
 
 class SistemaView:
-    def __init__(self, visitantes_service: VisitanteService):
+    def __init__(self, visitantes_service: VisitantesService):
         self.visitantes_service = visitantes_service
 
     def run(self):
@@ -36,7 +36,7 @@ class SistemaView:
                 case "4":
                     self.tela_ordenar_visitantes()
                 case "5":
-                    return
+                    self.tela_filtrar_visitantes()
                 case "6":
                     self.tela_consultar_por_cpf()
                 case "7":
@@ -54,10 +54,17 @@ class SistemaView:
             nome = solicitar_texto("Nome: ")
 
             while True:
-                data_nascimento = solicitar_texto("Data de Nascimento (DD-MM-YYYY): ")
+                data_nascimento = solicitar_texto("Data de Nascimento (DD/MM/YYYY): ")
                 try:
-                    data_nascimento = datetime.strptime(data_nascimento, '%d-%m-%Y').date()
-                    break
+                    data_nascimento = datetime.strptime(data_nascimento, '%d/%m/%Y').date()
+                    if data_nascimento > datetime.now().date():
+                        print("Erro: Data de nascimento inválida! (O visitante não pode nascer no futuro)")
+                        input()
+                    elif data_nascimento.year > datetime.now().date().year - 18:
+                        print("Erro: Data de nascimento inválida! (O cadastro deve ser realizado por um adulto)")
+                        input()
+                    else:
+                        break
                 except:
                     input("Erro: Valor inválido!")
 
@@ -94,10 +101,14 @@ class SistemaView:
                         input("Erro: Valor inválido!")
 
             while True:
-                data_visita = solicitar_texto("Data de Visita (DD-MM-YYYY): ")
+                data_visita = solicitar_texto("Data de Visita (DD/MM/YYYY): ")
                 try:
-                    data_visita = datetime.strptime(data_visita, '%d-%m-%Y').date()
-                    break
+                    data_visita = datetime.strptime(data_visita, '%d/%m/%Y').date()
+                    if data_visita < datetime.now().date():
+                        print("Erro: Data de visita inválida! (A visita não pode ser realizada no passado)")
+                        input()
+                    else:
+                        break
                 except:
                     input("Erro: Valor inválido!")
 
@@ -111,9 +122,8 @@ class SistemaView:
 
             resultado = self.visitantes_service.cadastrar_visitante(novo_visitante)
 
-            print()
-            print(resultado)
-            print()
+            print(divider)
+            print_resultado(resultado)
             print(divider)
             mensagem_voltar()
             return
@@ -125,25 +135,29 @@ class SistemaView:
 
             print()
             print("Remover por CPF:")
+            print("Digite '1' para voltar")
             print(divider)
-            while True:
-                try:
-                    cpf = solicitar_texto("CPF: ")
-                    if len(cpf) != 11:
+            try:
+                cpf = input("CPF: ")
+                if cpf == '1':
+                    return
+                if len(cpf) != 11:
+                    print("Erro: CPF inválido, deve conter 11 caracteres!")
+                    input()
+                    continue
+            except:
+                input("Erro: Valor inválido!")
+                continue
 
-                        print()
-                        input("Erro: CPF inválido, deve conter 11 caracteres!")
-                    else:
-                        break
-                except:
-                    input("Erro: Valor inválido!")
+            print("Tem certeza que deseja remover o visitante? (S/n)")
+            confirmar = input("Opção: ").lower()
+            if confirmar != "s":
+                return
 
-            resultado = self.visitantes_service.consultar_por_cpf(cpf)
+            resultado = self.visitantes_service.remover_visitante_por_cpf(cpf)
 
-            for chave, valor in resultado.items():
-                print(f"{chave}: {valor}")
-
-            print()
+            print(divider)
+            print_resultado(resultado)
             print(divider)
             mensagem_voltar()
             return
@@ -158,12 +172,12 @@ class SistemaView:
             print(divider)
 
             resultado = self.visitantes_service.listar_todos()
-
-            for chave, valor in resultado.items():
-                print(f"{chave}: {valor}")
+            for visitante in resultado:
+                for chave, valor in visitante.items():
+                    print(f"{chave}: {valor}")
+                print(divider)
 
             print()
-            print(divider)
             mensagem_voltar()
             return
 
@@ -179,23 +193,29 @@ class SistemaView:
             print("1. Ordernar por nome")
             print("2. Ordernar por idade")
             print("3. Voltar")
+            print()
 
             escolha = input("Opção: ")
             match escolha:
                 case "1":
-                    resultado = self.visitantes_service.listar_todos(ordem=Ordenar.Nome)
+                    resultado = ordem = Ordenar.Nome
                 case "2":
-                    resultado = self.visitantes_service.listar_todos(ordem=Ordenar.Idade)
+                    resultado = ordem = Ordenar.Idade
                 case "3":
                     break
                 case _:
                     continue
 
-            for chave, valor in resultado.items():
-                print(f"{chave}: {valor}")
+            print(divider)
+            print("Visitantes:")
+            print(divider)
+            resultado = self.visitantes_service.listar_por_ordem(ordem)
+            for visitante in resultado:
+                for chave, valor in visitante.items():
+                    print(f"{chave}: {valor}")
+                print(divider)
 
             print()
-            print(divider)
             mensagem_voltar()
             return
 
@@ -212,25 +232,30 @@ class SistemaView:
             print("2. Filtrar por Ingresso VIP")
             print("3. Filtrar por Ingresso Premium")
             print("4. Voltar")
+            print()
 
             escolha = input("Opção: ")
             match escolha:
                 case "1":
-                    resultado = self.visitantes_service.listar_todos(filtro=IngressoTipo.Normal)
+                    resultado = filtro = IngressoTipo.Normal
                 case "2":
-                    resultado = self.visitantes_service.listar_todos(filtro=IngressoTipo.Vip)
+                    resultado = filtro = IngressoTipo.Vip
                 case "3":
-                    resultado = self.visitantes_service.listar_todos(filtro=IngressoTipo.Premium)
+                    resultado = filtro = IngressoTipo.Premium
                 case "4":
                     break
                 case _:
                     continue
 
-            for chave, valor in resultado.items():
-                print(f"{chave}: {valor}")
+            print(divider)
+            print(f"Visitantes {filtro}:")
+            print(divider)
+            resultado = self.visitantes_service.listar_por_ingresso(filtro)
+            for visitante in resultado:
+                print(f"{visitante["Nome"]} - {visitante["Idade"]} anos")
+                print(divider)
 
             print()
-            print(divider)
             mensagem_voltar()
             return
 
@@ -241,24 +266,23 @@ class SistemaView:
 
             print()
             print("Consulta por CPF:")
+            print("Digite '1' para voltar")
             print(divider)
-            while True:
-                try:
-                    cpf = solicitar_texto("CPF: ")
-                    if len(cpf) != 11:
-
-                        print()
-                        input("Erro: CPF inválido, deve conter 11 caracteres!")
-                    else:
-                        break
-                except:
-                    input("Erro: Valor inválido!")
+            try:
+                cpf = input("CPF: ")
+                if cpf == '1':
+                    return
+                if len(cpf) != 11:
+                    print("Erro: CPF inválido, deve conter 11 caracteres!")
+                    input()
+                    continue
+            except:
+                input("Erro: Valor inválido!")
+                continue
 
             resultado = self.visitantes_service.consultar_por_cpf(cpf)
             print(divider)
-            for chave, valor in resultado.items():
-                print(f"{chave}: {valor}")
-
+            print_resultado(resultado)
             print(divider)
             mensagem_voltar()
             return

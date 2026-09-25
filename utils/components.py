@@ -1,4 +1,4 @@
-title_divider = "=" * 40
+title_divider = "=" * 32
 divider = "-" * 30
 
 def print_title():
@@ -16,4 +16,5 @@ def solicitar_texto(mensagem):
     print("Este campo não pode ficar vazio!")
 
 def mensagem_voltar():
-    input("Pressione Enter para voltar")
+    print("Pressione Enter para voltar")
+    input()

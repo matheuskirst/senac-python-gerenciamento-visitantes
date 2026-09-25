@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class IngressoTipo(Enum):
-    Normal = 1
-    Vip = 2
-    Premium = 3
+class IngressoTipo(StrEnum):
+    Normal = "Normal"
+    Vip = "VIP"
+    Premium = "Premium"

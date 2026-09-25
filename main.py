@@ -1,11 +1,11 @@
 from data import DbContext
-from services import VisitanteService
+from services import VisitantesService
 from view import SistemaView
 
 def main():
     db = DbContext()
-    visitante_service = VisitanteService(db=db)
-    sistema_view = SistemaView(visitantes_service=visitante_service)
+    visitantes_service = VisitantesService(db=db)
+    sistema_view = SistemaView(visitantes_service=visitantes_service)
 
     sistema_view.run()
 
