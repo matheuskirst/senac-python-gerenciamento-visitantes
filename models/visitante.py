@@ -5,11 +5,11 @@ from enums import IngressoTipo
 @dataclass
 class Visitante:
     nome: str
-    data_nascimento: str
+    data_nascimento: date
     idade: int
     cpf: str
     ingresso_tipo: IngressoTipo
-    data_visita: str
+    data_visita: date
     numero_ingresso: str
 
     class Campo:

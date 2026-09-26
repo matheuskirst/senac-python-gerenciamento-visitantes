@@ -220,3 +220,88 @@ Ao escolher a opção 7, o programa deverá ser encerrado.
 ## 10. Extra: Salvar visitantes em arquivo json
 Salvar visitantes cadastrados em um arquivo json para manter a persistência dos dados.
 Ao listar os visitantes, deve ler desse arquivo json.
+
+## 11. Controle de data da visita
+
+O sistema deverá validar a data da visita informada pelo usuário.
+
+- A data não poderá ser anterior à data atual.
+- O sistema deverá aceitar somente datas válidas.
+- Caso seja informada uma data inválida, deverá apresentar:
+
+```text
+Data da visita inválida.
+
+Informe uma data igual ou posterior à data atual.
+```
+
+## 12. Consultar visitantes por data da visita
+
+O sistema deverá possuir uma nova opção no menu para consultar os visitantes que possuem uma determinada data de visita.
+
+O menu deverá ser atualizado para:
+```text
+========================================
+             PARQUE AVENTURA
+========================================
+
+1 - Cadastrar visitante
+2 - Remover visitante
+3 - Listar visitantes
+4 - Ordenar visitantes
+5 - Filtrar visitantes
+6 - Consultar visitante
+7 - Consultar por data da visita
+0 - Encerrar programa
+
+Escolha uma opção:
+```
+
+O sistema deverá solicitar uma data e apresentar os visitantes que irão ao parque naquele dia.
+
+Exemplo:
+
+```text
+========================================
+       VISITANTES DO DIA 20/09/2026
+========================================
+
+João da Silva - 26 anos - VIP
+Maria Souza - 19 anos - Normal
+Pedro Oliveira - 34 anos - Premium
+
+Caso não existam visitantes para a data informada:
+
+Nenhum visitante encontrado para esta data.
+```
+
+## 13. Estatísticas dos visitantes
+
+O sistema deverá possuir uma opção para apresentar um resumo estatístico dos visitantes cadastrados.
+
+Deverá apresentar:
+
+- Total de visitantes;
+- Quantidade de ingressos Normal;
+- Quantidade de ingressos VIP;
+- Quantidade de ingressos Premium;
+- Média de idade dos visitantes.
+
+Exemplo:
+```text
+========================================
+          ESTATÍSTICAS DO PARQUE
+========================================
+
+Total de visitantes: 25
+
+Ingressos Normal: 10
+Ingressos VIP: 8
+Ingressos Premium: 7
+
+Média de idade: 27,4 anos
+
+Caso não existam visitantes cadastrados:
+
+Não existem visitantes cadastrados para gerar estatísticas.
+```

@@ -64,11 +64,13 @@ class VisitantesService:
             return lista_visitantes_dados
 
         except:
-            return [{"Erro": f"Ocorreu um erro interno"}]
+            return [{"Erro": "Ocorreu um erro interno"}]
 
     def listar_por_ingresso(self, ingresso:IngressoTipo):
         try:
-            visitantes = self.db.obter_visitantes_lista(filtro=ingresso)
+            filtros = {"filtro_campo": Visitante.Campo.ingresso_tipo, "filtro_valor": ingresso}
+
+            visitantes = self.db.obter_visitantes_lista(filtro=filtros)
 
             if not visitantes:
                 return {"Erro": "Não ha visitantes cadastrados."}
@@ -89,7 +91,14 @@ class VisitantesService:
 
     def listar_por_ordem(self, ordem:Ordenar):
         try:
-            visitantes = self.db.obter_visitantes_lista(ordem=ordem)
+            ordenar = ""
+            match ordem:
+                case Ordenar.Nome:
+                    ordenar = Visitante.Campo.nome
+                case Ordenar.Idade:
+                    ordenar = Visitante.Campo.idade
+
+            visitantes = self.db.obter_visitantes_lista(ordernar_campo = ordenar)
 
             if not visitantes:
                 return {"Erro": "Não ha visitantes cadastrados."}
@@ -129,3 +138,59 @@ class VisitantesService:
 
         except:
             return {"Erro": "Ocorreu um erro interno."}
+
+    def consultar_por_data(self, data: date):
+        try:
+            visitantes = self.db.obter_visitantes_lista(campo=Visitante.Campo.data_visita, valor=data)
+
+            if visitantes == None:
+                return {"Erro": "Nenhum visitante encontrado"}
+
+            visitantes_dados = []
+
+            for visitante in visitantes:
+                dados = {
+                    "Nome": visitante.nome,
+                    "Idade": f"{visitante.idade} anos",
+                    "CPF": visitante.cpf,
+                    "Data de Nascimento": visitante.data_nascimento.strftime('%d/%m/%Y'),
+                    "Ingresso": resolver_ingresso_tipo(visitante.ingresso_tipo),
+                    "Data da visita": visitante.data_visita.strftime('%d/%m/%Y'),
+                    "Número do ingresso": visitante.numero_ingresso
+                }
+                visitantes_dados.append(dados)
+            return visitantes_dados
+
+        except:
+            return {"Erro": "Ocorreu um erro interno."}
+
+    def obter_estatisticas(self):
+        visitantes = self.db.obter_visitantes_lista()
+
+        if visitantes == None or len(visitantes) == 0:
+            return {"Erro": "Não existem visitantes cadastrados para gerar estatísticas"}
+
+
+
+        quantidade = self.db.obter_quantidade_visitantes()
+
+        ingresso = IngressoTipo.Normal
+        ingressos_normal = len(self.db.obter_quantidade_visitantes(filtro=ingresso))
+        ingresso = IngressoTipo.Vip
+        ingressos_vip = len(self.db.obter_quantidade_visitantes(filtro=ingresso))
+        ingresso = IngressoTipo.Premium
+        ingressos_premium = len(self.db.obter_quantidade_visitantes(filtro=ingresso))
+
+        lista_idades = self.db.obter_campo_lista(campo=Visitante.Campo.idade)
+
+        idade_media = sum(lista_idades) / len(lista_idades)
+
+        estatisticas = {
+            "Total de visitantes": quantidade,
+            "Ingressos Normal": ingressos_normal,
+            "Ingressos VIP": ingressos_vip,
+            "Ingressos Premium": ingressos_premium,
+            "Média de idade": idade_media
+        }
+        
+        return estatisticas

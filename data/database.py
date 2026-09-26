@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from dataclasses import asdict
+from dataclasses import asdict, fields
 from models import Visitante
 from enums import Ordenar, IngressoTipo
 
@@ -27,22 +27,68 @@ class DbContext:
                 return item
         return None
 
-    def obter_visitantes_lista(self, ordem:Ordenar=None, filtro:IngressoTipo=None):
-        items = self.visitantes
+    def obter_visitantes_lista(self, **query):
+        items = []
 
-        if ordem:
-            if ordem == Ordenar.Nome:
-                items = sorted(items, key=lambda v: v.nome)
-            elif ordem == Ordenar.Idade:
-                items = sorted(items, key=lambda v: v.idade)
+        if not query:
+            items = self.visitantes
+            return items
 
-        if filtro:
-            items = filter(lambda v: v.ingresso_tipo == filtro, items)
+        query_filtros: list[dict] = query.get("filtros", None)
+
+        for item in self.visitantes:
+            for filtro in query_filtros:
+                if getattr(item, filtro.get("filtro_campo", None)) == filtro.get("filtro_valor", None):
+                    items.append(item)
+
+        items = sorted(items, key=lambda v: getattr(v, query.get("ordenar_campo", None)))
 
         return items
 
-    def obter_quantidade_visitantes(self):
-        return len(self.visitantes)
+    # def obter_visitantes_lista(self, campo:str=None, valor=None, ordem:Ordenar=None, filtro:IngressoTipo=None):
+    #     items = []
+
+    #     if campo:
+    #         for item in self.visitantes:
+    #             if getattr(item, campo) == valor:
+    #                 items.append(item)
+    #     else:
+    #         items = self.visitantes
+
+    #     if ordem:
+    #         if ordem == Ordenar.Nome:
+    #             items = sorted(items, key=lambda v: v.nome)
+    #         elif ordem == Ordenar.Idade:
+    #             items = sorted(items, key=lambda v: v.idade)
+
+    #     if filtro:
+    #         items = filter(lambda v: v.ingresso_tipo == filtro, items)
+
+    #     return items
+
+    def obter_campo_lista(self, campo:str=None):
+        items = []
+
+        if campo == None or campo.strip() == "":
+            return None
+
+        for item in self.visitantes:
+            valor = getattr(item, campo)
+            items.append(valor)
+
+        return items
+
+    def obter_quantidade_visitantes(self, filtro):
+        items = self.visitantes
+
+        # if filtro:
+        #     for item in items:
+        #         for field in fields(item):
+        #             if getattr(item, field) == filtro:
+
+        items = filter(lambda v: v.ingresso_tipo == filtro, items)
+
+        return len(items)
 
     def carregar_dados(self):
         try:
