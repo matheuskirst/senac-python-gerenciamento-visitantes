@@ -21,8 +21,10 @@ class SistemaView:
             print("3. Listar Visitantes")
             print("4. Ordenar Visitantes")
             print("5. Filtrar Visitantes")
-            print("6. Consultar Visitante por CPF")
-            print("7. Encerrar Programa")
+            print("6. Consultar por CPF")
+            print("7. Consultar por data da visita")
+            print("8. Estatísticas")
+            print("0. Encerrar Programa")
             print(divider)
             escolha = input("\nSelecione uma opção: ")
 
@@ -40,6 +42,10 @@ class SistemaView:
                 case "6":
                     self.tela_consultar_por_cpf()
                 case "7":
+                    self.tela_consultar_por_data()
+                case "8":
+                    self.tela_estatisticas()
+                case "0":
                     break
 
     def tela_cadastrar_visitante(self):
@@ -105,7 +111,7 @@ class SistemaView:
                 try:
                     data_visita = datetime.strptime(data_visita, '%d/%m/%Y').date()
                     if data_visita < datetime.now().date():
-                        print("Erro: Data de visita inválida! (A visita não pode ser realizada no passado)")
+                        print("Erro: Data de visita inválida! (Informe uma data igual ou posterior à data atual)")
                         input()
                     else:
                         break
@@ -135,11 +141,10 @@ class SistemaView:
 
             print()
             print("Remover por CPF:")
-            print("Digite '1' para voltar")
             print(divider)
             try:
                 cpf = input("CPF: ")
-                if cpf == '1':
+                if cpf == "":
                     return
                 if len(cpf) != 11:
                     print("Erro: CPF inválido, deve conter 11 caracteres!")
@@ -204,7 +209,7 @@ class SistemaView:
                 case "3":
                     break
                 case _:
-                    continue
+                    return
 
             print(divider)
             print("Visitantes:")
@@ -217,7 +222,6 @@ class SistemaView:
 
             print()
             mensagem_voltar()
-            return
 
     def tela_filtrar_visitantes(self):
         while True:
@@ -231,7 +235,6 @@ class SistemaView:
             print("1. Filtrar por Ingresso Normal")
             print("2. Filtrar por Ingresso VIP")
             print("3. Filtrar por Ingresso Premium")
-            print("4. Voltar")
             print()
 
             escolha = input("Opção: ")
@@ -242,10 +245,8 @@ class SistemaView:
                     resultado = filtro = IngressoTipo.Vip
                 case "3":
                     resultado = filtro = IngressoTipo.Premium
-                case "4":
-                    break
                 case _:
-                    continue
+                    return
 
             print(divider)
             print(f"Visitantes {filtro}:")
@@ -257,7 +258,6 @@ class SistemaView:
 
             print()
             mensagem_voltar()
-            return
 
     def tela_consultar_por_cpf(self):
         while True:
@@ -266,11 +266,10 @@ class SistemaView:
 
             print()
             print("Consulta por CPF:")
-            print("Digite '1' para voltar")
             print(divider)
             try:
                 cpf = input("CPF: ")
-                if cpf == '1':
+                if cpf == "":
                     return
                 if len(cpf) != 11:
                     print("Erro: CPF inválido, deve conter 11 caracteres!")
@@ -285,4 +284,48 @@ class SistemaView:
             print_resultado(resultado)
             print(divider)
             mensagem_voltar()
-            return
+
+    def tela_consultar_por_data(self):
+        while True:
+            clear_screen()
+            print_title()
+
+            print()
+            print("Consulta por data da visita (DD/MM/AAAA):")
+            print(divider)
+            try:
+                data = input("Data: ")
+                if data == "":
+                    return
+                data = datetime.strptime(data, '%d/%m/%Y')
+            except:
+                input("Erro: Valor inválido!")
+                continue
+
+            print()
+            print(divider)
+            print(f"Visitantes para {data.strftime('%d/%m/%Y')}:")
+            print(divider)
+            resultado = self.visitantes_service.consultar_por_data(data)
+            for visitante in resultado:
+                for chave, valor in visitante.items():
+                    print(f"{chave}: {valor}")
+                print(divider)
+
+            print()
+            mensagem_voltar()
+
+    def tela_estatisticas(self):
+        while True:
+            clear_screen()
+            print_title()
+
+            print()
+            print("Estatísticas do parque:")
+            print(divider)
+
+            resultado = self.visitantes_service.obter_estatisticas()
+            
+            print(resultado)
+            print()
+            mensagem_voltar()

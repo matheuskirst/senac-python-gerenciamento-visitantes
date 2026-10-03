@@ -129,3 +129,32 @@ class VisitantesService:
 
         except:
             return {"Erro": "Ocorreu um erro interno."}
+
+    def obter_estatisticas(self):
+        visitantes = self.db.obter_visitantes_lista()
+
+        if visitantes == None or len(visitantes) == 0:
+            return {"Erro": "Não existem visitantes cadastrados para gerar estatísticas"}
+
+        quantidade = self.db.obter_quantidade_visitantes()
+
+        ingresso = IngressoTipo.Normal
+        ingressos_normal = self.db.obter_quantidade_visitantes(filtro=ingresso)
+        ingresso = IngressoTipo.Vip
+        ingressos_vip = self.db.obter_quantidade_visitantes(filtro=ingresso)
+        ingresso = IngressoTipo.Premium
+        ingressos_premium = self.db.obter_quantidade_visitantes(filtro=ingresso)
+
+        lista_idades = self.db.obter_visitantes_lista(campo=Visitante.Campo.idade)
+
+        idade_media = sum(lista_idades) / len(lista_idades)
+
+        estatisticas = {
+            "Total de visitantes": quantidade,
+            "Ingressos Normal": ingressos_normal,
+            "Ingressos VIP": ingressos_vip,
+            "Ingressos Premium": ingressos_premium,
+            "Média de idade": idade_media
+        }
+        
+        return estatisticas

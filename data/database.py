@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from dataclasses import asdict
+from dataclasses import asdict, fields
 from models import Visitante
 from enums import Ordenar, IngressoTipo
 
@@ -27,8 +27,14 @@ class DbContext:
                 return item
         return None
 
-    def obter_visitantes_lista(self, ordem:Ordenar=None, filtro:IngressoTipo=None):
-        items = self.visitantes
+    def obter_visitantes_lista(self, campo=None, valor=None, ordem=None, filtro=None):
+        items = []
+
+        if campo:
+            for item in self.visitantes:
+                items.append(getattr(item, campo))
+        else:
+            items = self.visitantes
 
         if ordem:
             if ordem == Ordenar.Nome:
@@ -41,8 +47,18 @@ class DbContext:
 
         return items
 
-    def obter_quantidade_visitantes(self):
-        return len(self.visitantes)
+    def obter_quantidade_visitantes(self, filtro=None):
+        filtered_list = []
+
+        if filtro:
+            for item in self.visitantes:
+                for field in fields(item):
+                    if getattr(item, field.name) == filtro:
+                        filtered_list.append(item)
+        else:
+            filtered_list = self.visitantes
+
+        return len(filtered_list)
 
     def carregar_dados(self):
         try:
